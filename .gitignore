@@ -1,0 +1,11 @@
+*.aux
+*.bbl
+*.blg
+*.log
+*.synctex.gz
+*save_figure*
+untitled*
+*.zip
+~*
+Logger_*
+*.pyc
