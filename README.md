@@ -1,5 +1,38 @@
 # lib_global_python
 
+## add this repo as submodule into another git repo
+```bash
+git submodule add https://github.com/chaconinc/DbConnector
+```
+
+## clone repo with this submodule
+
+```bash
+git clone --recursive ####
+```
+
+or clone the repo in a classic way
+```bash
+git clone ####
+```
+after cloning 
+```bash
+git submodule update --init --recursive
+```
+
+git branch
+git checkout ###
+
+git pull --recurse-submodules
+
+
+
+git add and commit in submodule repo
+git add and commit in global repo
+git push
+or
+git push --recurse-submodules=check
+
 ## Python module installation
 #### pexpect library in python needed to work with gaspard
 ```bash
