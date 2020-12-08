@@ -5,7 +5,21 @@ import os
 # File information are based on parameters set in 'config' from a .ini file
 def createLoggerFile(config):
     #filename from config file
-    filename = config.get('filenameLogger','folderPATH')+config.get('filenameLogger','filename')
+    filename,i=searchFileName(config.get('filenameLogger','folderPATH'),
+                        config.get('filenameLogger','filename'))
+
+    #create recording file
+    print("Logger file name: "+config.get('filenameLogger','filename')+"%s.txt" % format(i, '02d'))
+    fh = open(filename, "w")
+    fh.write(config.get('filenameLogger','firstLine')+"\n")
+
+    return fh
+
+############
+# Search indented filename and create an empty folder if needed
+def searchFileName(folderPATH,filename_):
+    #filename from config file
+    filename = folderPATH+filename_
 
     # create indented filename
     i = 0
@@ -21,9 +35,4 @@ def createLoggerFile(config):
             if exc.errno != errno.EEXIST:
                 raise
 
-    #create recording file
-    print("Logger file name: "+config.get('filenameLogger','filename')+"%s.txt" % format(i, '02d'))
-    fh = open(filename, "w")
-    fh.write(config.get('filenameLogger','firstLine')+"\n")
-
-    return fh
+    return filename, i
