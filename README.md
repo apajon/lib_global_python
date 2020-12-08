@@ -1,12 +1,21 @@
 # lib_global_python
-
-## add this repo as submodule into another git repo
+____
+# Table of content
+- [Adding this submodule](#Adding-this-submodule)
+- [Using repo with submodules](#Using-repo-with-submodules)
+  - [Clone](#Clone)
+  - [Pull](#Pull)
+  - [Push](#Push)
+- [Python module installation](#Python-module-installation)
+____
+# Add this submodule
+add this repo as submodule into another git repo
 ```bash
-git submodule add https://github.com/chaconinc/DbConnector
+git submodule add https://github.com/apajon/lib_global_python
 ```
-
-## clone repo with this submodule
-
+____
+# Using repo with submodules
+## Clone
 ```bash
 git clone --recursive ####
 ```
@@ -14,26 +23,37 @@ git clone --recursive ####
 or clone the repo in a classic way
 ```bash
 git clone ####
-```
-after cloning 
-```bash
 git submodule update --init --recursive
 ```
-
+after any method
+```bash
+cd #SUBMODULE PATH#
 git branch
-git checkout ###
-
+git checkout #chosen branch#
+```
+## Pull
+```bash
 git pull --recurse-submodules
-
-
-
-git add and commit in submodule repo
-git add and commit in global repo
+```
+## Push
+```bash
+cd #submodule repo#
+git add *
+git commit -m "update submodule"
+cd ..
+git add #submodule repo#
+git commit "update submodule"
+```
+```bash
 git push
+```
 or
+```bash
 git push --recurse-submodules=check
+```
 
-## Python module installation
+____
+# Python module installation
 #### pexpect library in python needed to work with gaspard
 ```bash
 pip install pexpect
