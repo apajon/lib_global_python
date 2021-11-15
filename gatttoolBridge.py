@@ -17,11 +17,13 @@ class GatttoolBridge:
         self.setDeviceMacAddress(DEVICE_MAC_ADDRESS)
         self.setUuid(uuid_char)
         self.setHnd(handle_char)
+
+        self.autoMACADRESS=False
         pass
     
     def setDeviceMacAddress(self,DEVICE_MAC_ADDRESS):
         if self.connected():
-            print("Deconnecting from "),
+            print("Disconnecting from "),
             print(self.DEVICE_MAC_ADDRESS)
             while not self.disconnectBLEWthGatttool():
                 pass
@@ -53,10 +55,27 @@ class GatttoolBridge:
     def message(self):
         return self.last_Messages,self.last_update
     
-    def launchGatttool(self):
+    def launchGatttool(self,**kwargs):
+        # kwargs : (random,listen,adress)
+        cmd_line="gatttool -I -m 244"
+
+        if "random" in kwargs:
+            if kwargs["random"] and isinstance(kwargs["random"],bool):
+                cmd_line+=" -t random"
+
+        if "listen" in kwargs:
+            if kwargs["listen"] and isinstance(kwargs["listen"],bool):
+                cmd_line+=" --listen"
+
+        if "adress" in kwargs:
+            if kwargs["adress"] and isinstance(kwargs["adress"],bool) and len(self.DEVICE_MAC_ADDRESS):
+                cmd_line+=" -b "+self.DEVICE_MAC_ADDRESS
+                self.autoMACADRESS=True
+
         # Run gatttool interactively.
-        print("Run gatttool...")
-        self.child = pexpect.spawn("gatttool -I")
+        print("Run gatttool with ...")
+        print(cmd_line)
+        self.child = pexpect.spawn(cmd_line)
         
     def connectBLEWthGatttool(self):
         # Use gatttool interactively opened in 'child' to connect the BLE device
@@ -68,8 +87,13 @@ class GatttoolBridge:
                 # Connect to the device.
                 print("Connecting to "),
                 print(self.DEVICE_MAC_ADDRESS)
-                self.child.sendline("connect {0}".format(self.DEVICE_MAC_ADDRESS))
-                self.child.expect("Connection successful", timeout=5)
+                if self.autoMACADRESS:
+                    self.sendLine("connect")
+                else:
+                    self.sendLine("connect {0}".format(self.DEVICE_MAC_ADDRESS))
+                print("toto")
+                self.expect("Connection successful", timeout_=5)
+                print("tata")
                 self.connected_to_peripheral = True
                 print(" Connected!")
             except:
@@ -88,9 +112,9 @@ class GatttoolBridge:
     
     def disconnectBLEWthGatttool(self):
         # disconnect the BLE device from gatttool interactively opened in 'spawn'
-        self.child.sendline("disconnect")
+        self.sendLine("disconnect")
         # Close the interactive session of gatttool in 'spawn'
-        self.child.sendline("exit")
+        self.sendLine("exit")
         
         self.connected_to_peripheral = False
         return self.connected()
@@ -98,21 +122,26 @@ class GatttoolBridge:
     def charReadUuid(self,uuid_char):
         # Read the Characteristic value of 'spawn' from the Characteristic UUID in
         # 'uuid_char'
-        self.child.sendline("char-read-uuid {0}".format(uuid_char))
-        self.child.expect("value: ", timeout=10)
-        self.child.expect("\r\n", timeout=10)
+        self.sendLine("char-read-uuid {0}".format(uuid_char))
+        self.expect("value: ", timeout_=10)
+        self.expect("\r\n", timeout_=10)
         return self.child.before
     
     def charReadHnd(self,handle_char):
         # Read the Characteristic value of 'spawn' from the Characteristic handle in
         # 'handle_char'
-        self.child.sendline("char-read-hnd {0}".format(handle_char))
-        self.child.expect("value/descriptor: ", timeout=10)
-        self.child.expect("\r\n", timeout=10)
+        self.sendLine("char-read-hnd {0}".format(handle_char))
+        self.expect("value/descriptor: ", timeout_=10)
+        self.expect("\r\n", timeout_=10)
         return self.child.before
     
     def sendLine(self,line):
         self.child.sendline(line)
+
+    def expect(self,line,timeout_=1):
+        self.child.expect(line, timeout=timeout_)
+        self.child.expect("\r\n", timeout=timeout_)
+        return self.child.before
         
     def update(self):
         if self.connected():
