@@ -4,7 +4,7 @@ def createClient(clientName,config):
     #create client connected to mqtt broker
     
     #create new instance
-    print("MQTT creating new instance named : "+clientName)
+    print("MQTT creating new instance named : "+str(clientName))
     client = mqtt.Client(clientName) 
     
     #set username and password
