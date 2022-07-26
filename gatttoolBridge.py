@@ -124,7 +124,7 @@ class GatttoolBridge:
         # 'uuid_char'
         self.sendLine("char-read-uuid {0}".format(uuid_char))
         self.expect("value: ", timeout_=10)
-        self.expect("\r\n", timeout_=10)
+        # self.expect("\r\n", timeout_=10)
         return self.child.before
     
     def charReadHnd(self,handle_char):
@@ -132,7 +132,7 @@ class GatttoolBridge:
         # 'handle_char'
         self.sendLine("char-read-hnd {0}".format(handle_char))
         self.expect("value/descriptor: ", timeout_=10)
-        self.expect("\r\n", timeout_=10)
+        # self.expect("\r\n", timeout_=10)
         return self.child.before
     
     def sendLine(self,line):
