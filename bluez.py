@@ -16,10 +16,10 @@ DBUS_OBJECT_MANAGER_INTERFACE = 'org.freedesktop.DBus.ObjectManager'
 DBUS_PROPERTIES_INTERFACE = 'org.freedesktop.DBus.Properties'
 
 BLUEZ_BUS_NAME = 'org.bluez'
-BLUEZ_ADAPTER_INTERFACE = BLUEZ_BUS_NAME + '.Adapter1'
-BLUEZ_DEVICE_INTERFACE = BLUEZ_BUS_NAME + '.Device1'
-BLUEZ_GATTSERVICE_INTERFACE = BLUEZ_BUS_NAME + '.GattService1'
-BLUEZ_GATTCHARACTERISTIC_INTERFACE = BLUEZ_BUS_NAME + '.GattCharacteristic1'
+BLUEZ_ADAPTER_INTERFACE = f'{BLUEZ_BUS_NAME}.Adapter1'
+BLUEZ_DEVICE_INTERFACE = f'{BLUEZ_BUS_NAME}.Device1'
+BLUEZ_GATTSERVICE_INTERFACE = f'{BLUEZ_BUS_NAME}.GattService1'
+BLUEZ_GATTCHARACTERISTIC_INTERFACE = f'{BLUEZ_BUS_NAME}.GattCharacteristic1'
 
 class _BaseObject:
     def __init__(self, bluez, object_path, interface_name):
@@ -38,11 +38,10 @@ class _BaseObject:
         __logger__.debug(f'{proxy.get_object_path()}: Properties changed: {changed.print_(True)}')
     
     def __wait_property_changed(self, proxy, changed, invalidated):
-        if self.__wait_condition:
-            if self.__wait_condition['check'](changed):
-                cv = self.__wait_condition['cv']
-                with cv:
-                    cv.notifyAll()
+        if self.__wait_condition and self.__wait_condition['check'](changed):
+            cv = self.__wait_condition['cv']
+            with cv:
+                cv.notifyAll()
     
     def __wait_property_timeout(self):
         if self.__wait_condition:
@@ -131,9 +130,12 @@ class Manager:
                                                                 cancellable=None)
         self._om.connect('object-added', self.__object_added)
         self._om.connect('object-removed', self.__object_removed)
-        self._objects = {}
-        for o in self._om.get_objects():
-            self._objects[o.get_object_path()] = [i.get_interface_name() for i in o.get_interfaces()]
+        self._objects = {
+            o.get_object_path(): [
+                i.get_interface_name() for i in o.get_interfaces()
+            ]
+            for o in self._om.get_objects()
+        }
     
     def __object_added(self, om, object):
         p = object.get_object_path()
@@ -191,9 +193,8 @@ class Adapter(_BaseObject):
         try:
             def check(properties):
                 value = properties.lookup_value('Discovering')
-                if value is None:
-                    return False
-                return value.get_boolean()
+                return False if value is None else value.get_boolean()
+
             self._proxy.StartDiscovery()
             self._wait_property_change(check)
         except BaseException as e:
@@ -210,9 +211,8 @@ class Adapter(_BaseObject):
         try:
             def check(properties):
                 value = properties.lookup_value('Discovering')
-                if value is None:
-                    return False
-                return not value.get_boolean()
+                return False if value is None else not value.get_boolean()
+
             self._proxy.StopDiscovery()
             self._wait_property_change(check)
         except BaseException as e:
@@ -225,9 +225,11 @@ class Adapter(_BaseObject):
         """
         devices = [Device(self._bluez, path, BLUEZ_DEVICE_INTERFACE) for path, ifaces in self._bluez._objects.items()
                    if path.startswith(self._proxy.get_object_path()) and BLUEZ_DEVICE_INTERFACE in ifaces]
-        if not serviceUUID:
-            return devices
-        return [d for d in devices if serviceUUID in d.UUIDs]
+        return (
+            [d for d in devices if serviceUUID in d.UUIDs]
+            if serviceUUID
+            else devices
+        )
     
     def discover_device(self, check_fn, timeout_ms=10000):
         for device in self.get_devices():
@@ -283,18 +285,16 @@ class Device(_BaseObject):
             __logger__.info(f'{self._proxy.get_object_path()}: Already connected.')
             return
         self._proxy.Connect()
-        if self.Connected:
-            if not wait_for_services:
-                return
+        if self.Connected and not wait_for_services:
+            return
         def check(properties):
             value = None
             if wait_for_services:
                 value = properties.lookup_value('ServicesResolved')
             else:
                 value = properties.lookup_value('Connected')
-            if value is None:
-                return False
-            return value.get_boolean()
+            return False if value is None else value.get_boolean()
+
         self._wait_property_change(check, timeout_ms)
      
     def disconnect(self, timeout_ms=10000):
@@ -303,9 +303,8 @@ class Device(_BaseObject):
             return
         def check(properties):
             value = properties.lookup_value('Connected')
-            if value is None:
-                return False
-            return not value.get_boolean()
+            return False if value is None else not value.get_boolean()
+
         self._proxy.Disconnect()
         self._wait_property_change(check, timeout_ms)
     

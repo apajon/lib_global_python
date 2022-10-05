@@ -18,7 +18,7 @@ def on_message(client, userdata, message):
     if client.printLog:
         k=0
         while k<len(firstLine):
-            print(firstLine[k]+" : "+str(json_data[firstLine[k]]))
+            print(f"{firstLine[k]} : {str(json_data[firstLine[k]])}")
             k+=1
         print("----------")
 
@@ -26,6 +26,6 @@ def on_message(client, userdata, message):
     if client.saveLog:
         k=0
         while k<len(firstLine)-1:
-            client.fh.write(str(json_data[firstLine[k]])+ ", ")
+            client.fh.write(f"{str(json_data[firstLine[k]])}, ")
             k+=1
         client.fh.write(str(json_data[firstLine[k]])+ "\n")
