@@ -9,7 +9,12 @@ def createLoggerFile(config):
                         config.get('filenameLogger','filename'))
 
     #create recording file
-    print("Logger file name: "+config.get('filenameLogger','filename')+"%s.txt" % format(i, '02d'))
+    print(
+        "Logger file name: "
+        + config.get('filenameLogger', 'filename')
+        + f"{format(i, '02d')}.txt"
+    )
+
     fh = open(filename, "w")
     fh.write(config.get('filenameLogger','firstLine')+"\n")
 
@@ -23,9 +28,9 @@ def searchFileName(folderPATH,filename_):
 
     # create indented filename
     i = 0
-    while os.path.exists(filename+"%s.txt" % format(i, '02d')):
+    while os.path.exists(f"{filename}{format(i, '02d')}.txt"):
         i += 1
-    filename=filename+"%s.txt" % format(i, '02d')
+    filename = f"{filename}{format(i, '02d')}.txt"
 
     #create repository if not exist
     if not os.path.exists(os.path.dirname(filename)):

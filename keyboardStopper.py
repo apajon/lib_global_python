@@ -14,4 +14,3 @@ def do_stuff(*args):
     while not a_list:
         for num in args:
             exec(num)
-        pass

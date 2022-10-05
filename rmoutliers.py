@@ -27,13 +27,13 @@ def rmoutliers_percentiles(data,n_up,n_down):
 
       outliers_.sort(reverse=True)
 
-      TF = [False for i in range(data_temp.shape[1])]
+      TF = [False for _ in range(data_temp.shape[1])]
       for k in outliers_:
             data_temp=np.delete(data_temp,k,1)
             TF[k]=True
 
       if data_temp.shape[1]==0:
-          data_temp=data
-          TF = [False for i in range(data_temp.shape[1])]
+            data_temp=data
+            TF = [False for _ in range(data_temp.shape[1])]
 
       return data_temp, TF

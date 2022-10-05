@@ -12,8 +12,8 @@ def searchLoggerFile(config):
 
     # create indented filename
     i = 0
-    while os.path.exists(filename+"%s.txt" % format(i, '02d')):
+    while os.path.exists(f"{filename}{format(i, '02d')}.txt"):
         i += 1
-    filename=filename+"%s.txt" % format(i-1, '02d')
+    filename = f"{filename}{format(i - 1, '02d')}.txt"
 
     return filename

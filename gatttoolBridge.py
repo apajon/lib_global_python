@@ -13,13 +13,12 @@ class GatttoolBridge:
         self.connected_to_peripheral = False
         self.last_Messages=[]
         self.last_update = datetime.now()
-        
+
         self.setDeviceMacAddress(DEVICE_MAC_ADDRESS)
         self.setUuid(uuid_char)
         self.setHnd(handle_char)
 
         self.autoMACADRESS=False
-        pass
     
     def setDeviceMacAddress(self,DEVICE_MAC_ADDRESS):
         if self.connected():
@@ -27,27 +26,22 @@ class GatttoolBridge:
             print(self.DEVICE_MAC_ADDRESS)
             while not self.disconnectBLEWthGatttool():
                 pass
-            
+
         self.DEVICE_MAC_ADDRESS=DEVICE_MAC_ADDRESS
-        pass
         
     def setUuid(self,uuid_char):
-        if not len(uuid_char)==0:
+        if len(uuid_char) != 0:
             self.uuid_char=uuid_char
-        pass
     
     def setHnd(self,handle_char):
-        if not len(handle_char)==0:
+        if len(handle_char) != 0:
             self.handle_char=handle_char
-        pass
     
     def addUuid(self,uuid_char):
         self.uuid_char.extend(uuid_char)
-        pass
     
     def addHnd(self,handle_char):
         self.handle_char.extend(handle_char)
-        pass
     
     def connected(self):
         return self.connected_to_peripheral
@@ -59,18 +53,28 @@ class GatttoolBridge:
         # kwargs : (random,listen,adress)
         cmd_line="gatttool -I -m 244"
 
-        if "random" in kwargs:
-            if kwargs["random"] and isinstance(kwargs["random"],bool):
-                cmd_line+=" -t random"
+        if (
+            "random" in kwargs
+            and kwargs["random"]
+            and isinstance(kwargs["random"], bool)
+        ):
+            cmd_line+=" -t random"
 
-        if "listen" in kwargs:
-            if kwargs["listen"] and isinstance(kwargs["listen"],bool):
-                cmd_line+=" --listen"
+        if (
+            "listen" in kwargs
+            and kwargs["listen"]
+            and isinstance(kwargs["listen"], bool)
+        ):
+            cmd_line+=" --listen"
 
-        if "adress" in kwargs:
-            if kwargs["adress"] and isinstance(kwargs["adress"],bool) and len(self.DEVICE_MAC_ADDRESS):
-                cmd_line+=" -b "+self.DEVICE_MAC_ADDRESS
-                self.autoMACADRESS=True
+        if (
+            "adress" in kwargs
+            and kwargs["adress"]
+            and isinstance(kwargs["adress"], bool)
+            and len(self.DEVICE_MAC_ADDRESS)
+        ):
+            cmd_line += f" -b {self.DEVICE_MAC_ADDRESS}"
+            self.autoMACADRESS=True
 
         # Run gatttool interactively.
         print("Run gatttool with ...")
@@ -104,10 +108,10 @@ class GatttoolBridge:
                     print("Retrying...")
                 else:
                     print("Too many attempt to try connecting {0}".format(self.DEVICE_MAC_ADDRESS))
-        
+
         if not self.connected():
             self.disconnectBLEWthGatttool()
-    
+
         return self.connected()
     
     def disconnectBLEWthGatttool(self):
@@ -149,13 +153,12 @@ class GatttoolBridge:
             for k in self.uuid_char:
                 message=self.charReadUuid(k)
                 self.last_Messages.append(message)
-                
+
             for k in self.handle_char:
                 message=self.charReadHnd(k)
                 self.last_Messages.append(message)
-            
+
             self.last_update = datetime.now()
-        pass
     
     def to_json(self):
         result = {
@@ -170,8 +173,7 @@ class GatttoolBridge:
 def launchGatttool():
     # Run gatttool interactively.
     print("Run gatttool...")
-    child = pexpect.spawn("gatttool -I")
-    return child
+    return pexpect.spawn("gatttool -I")
 
 #connection
 def connectBLEWthGatttool(spawn,DEVICE_MAC_ADDRESS):
