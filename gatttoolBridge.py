@@ -1,3 +1,4 @@
+import contextlib
 import pexpect
 import json
 
@@ -140,7 +141,8 @@ class GatttoolBridge:
         return self.child.before
     
     def sendLine(self,line):
-        self.child.sendline(line)
+        with contextlib.suppress(Exception):
+            self.child.sendline(line)
 
     def expect(self,line,timeout_=1):
         self.child.expect(line, timeout=timeout_)
